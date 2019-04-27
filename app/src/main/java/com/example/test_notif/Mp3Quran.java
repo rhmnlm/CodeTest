@@ -35,19 +35,9 @@ public class Mp3Quran extends AppCompatActivity  implements MediaPlayer.OnBuffer
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mp3_quran);
 
-        final String[] links = getResources().getStringArray(R.array.links);
-
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.surah));
-        ListView listView = (ListView) findViewById(R.id.window_list);
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                url=links[position];
-            }
-        });
-
+        mediaPlayer = new MediaPlayer();
+        mediaPlayer.setOnBufferingUpdateListener(this);
+        mediaPlayer.setOnCompletionListener(this);
         seekBar = (SeekBar) findViewById(R.id.seekbar);
         seekBar.setMax(99);
         seekBar.setOnTouchListener(new View.OnTouchListener() {
@@ -66,30 +56,63 @@ public class Mp3Quran extends AppCompatActivity  implements MediaPlayer.OnBuffer
         testView = (TextView)findViewById(R.id.textTimer);
 
         btn_play_pause = (ImageButton) findViewById(R.id.btn_play_pause);
+
+        final String[] links = getResources().getStringArray(R.array.links);
+
+        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.surah));
+        ListView listView = (ListView) findViewById(R.id.window_list);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final ProgressDialog mDialog = new ProgressDialog(Mp3Quran.this);
+
+
+
+                url=links[position];
+                mediaPlayer.reset();
+                mediaPlayer.stop();
+                try{
+                    mDialog.setMessage("Please Wait");
+                    mDialog.show();
+                    mediaPlayer.setDataSource(links[position]);
+                    mediaPlayer.prepare();
+                }
+                catch (Exception ex){
+
+                }
+                mDialog.dismiss();
+                mediaFileLength = mediaPlayer.getDuration();
+                realTimeLength = mediaFileLength;
+                updateSeekBar();
+                mediaPlayer.start();
+                btn_play_pause.setImageResource(R.drawable.ic_pause);
+
+            }
+        });
+
         btn_play_pause.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick (View v){
 
-                final ProgressDialog mDialog = new ProgressDialog(Mp3Quran.this);
-
                 AsyncTask<String,String,String> mp3Play = new AsyncTask<String, String, String>() {
 
                     @Override
                     protected void onPreExecute(){
-                        mDialog.setMessage("Please Wait");
-                        mDialog.show();
+
                     }
 
                     @Override
                     protected String doInBackground(String... params) {
-                        try{
+                        /*try{
                             mediaPlayer.setDataSource(params[0]);
                             mediaPlayer.prepare();
                         }
                         catch (Exception ex){
 
-                        }
+                        }*/
                         return "";
                     }
 
@@ -107,7 +130,7 @@ public class Mp3Quran extends AppCompatActivity  implements MediaPlayer.OnBuffer
                         }
 
                         updateSeekBar();
-                        mDialog.dismiss();
+
                     }
                 };
 
@@ -116,9 +139,7 @@ public class Mp3Quran extends AppCompatActivity  implements MediaPlayer.OnBuffer
             }
         });
 
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setOnBufferingUpdateListener(this);
-        mediaPlayer.setOnCompletionListener(this);
+
 
     }
 
@@ -151,5 +172,12 @@ public class Mp3Quran extends AppCompatActivity  implements MediaPlayer.OnBuffer
     public void onCompletion(MediaPlayer mp) {
         btn_play_pause.setImageResource(R.drawable.ic_play);
 
+    }
+
+    @Override
+    public void onBackPressed(){
+        if(mediaPlayer != null && mediaPlayer.isPlaying())
+            mediaPlayer.stop();
+        finish();
     }
 }
