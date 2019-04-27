@@ -12,7 +12,7 @@
 package com.example.test_notif;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -26,7 +26,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -40,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView data;
     private Button next_page;
+    private Button mp3_page;
 
     private RequestQueue mRequestQueue;
     private String url = "https://api.azanpro.com/times/today.json?zone=sgr01&format=12-hour";
@@ -55,6 +55,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 openNextPage();
+            }
+        });
+        mp3_page = (Button) findViewById(R.id.mp3_page);
+        mp3_page.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openMp3Page();
             }
         });
 
@@ -164,5 +171,12 @@ private void jsonParse() {
         startActivity(intent);
 
     }
+
+    public void openMp3Page(){
+        Intent intent = new Intent(this, Mp3Quran.class);
+        startActivity(intent);
+
+    }
+
 }
 
